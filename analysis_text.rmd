@@ -1,0 +1,58 @@
+---
+title: "Hw7_grouped"
+author: "Jay"
+date: "2017年11月1日"
+output: html_document
+---
+
+# 問題意識
+  這篇是習近平著名的“三個半小時”演講，其文之長，廢話之多已經無須贅述。所以，我們認為此篇是最能體現textmining價值的文章。
+  我們的目的在，證明媒體所謂的“這篇演講是針對台灣”是否屬實。且希望知道對岸領導人的大致藍圖為何。
+
+# 分析方法
+  1. 用結巴斷詞
+  2. 用關鍵詞搜尋台灣相關的詞頻
+  3. 畫出文字云
+
+# 技術問題
+  基本上我們使用到jiebaR、table和wordcloud2。比較大的問題在於逐字稿的取得，由於沒有直接取得文字檔的途徑，所以我們是從網路新聞上人工截取。
+
+# 倫理問題
+  我們有想過文章的隱私權問題，但由於這篇是公開的國事報告，所以應該沒有隱私權問題。
+
+# 結論
+  由下文可以很清楚的顯示，在此篇文章中，講者幾乎沒有提到和“台灣”有關的詞語。而最高頻的有義詞是“發展”，顯示在表面上中共的國策還是以發展為優先，並沒有太大的變化，講稿還是充滿冗長的官話。
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(jiebaR)
+library(wordcloud2)
+```
+
+```{r friends.read, echo=TRUE}
+dataX_raw <- readLines("analysis_text.txt")
+seg <- worker()
+words <- seg[dataX_raw]
+
+table(unlist(words))["台灣"]
+
+table(unlist(words))["台"]
+
+table(unlist(words))["兩岸"]
+
+table(unlist(words))["兩岸關係"]
+
+tem_raw <- sort(table(unlist(words)),decreasing = T)
+
+endIndex <- 0
+for(i in c(1:length(tem_raw))){
+  if(tem_raw[i] == 5){
+    endIndex <- i - 1
+    break()
+  }
+}
+tem <- tem_raw[3:endIndex]
+
+wordcloud2(tem, size = 1,shape = 'star')
+```

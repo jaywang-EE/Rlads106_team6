@@ -1,0 +1,46 @@
+---
+title: "MidTermProject"
+author: "Jay"
+date: "2017年11月14日"
+output: html_document
+---
+
+```{r}
+library(jiebaR)
+library(tidyverse)
+library(tidytext)
+library(wordcloud2)
+library(Rfacebook)
+library(dplyr)
+library(magrittr)
+
+```
+
+```{r}
+token <- 'EAACEdEose0cBAJaUWD7wsnzZAyvLVBvJZAC6NGeDr0rJ4uFU8G8z86IdHkGzrwtnlaIGZBvekc8EY3RbADdmQDoYgDznna8LcNblos8ZAYZCNdAuKb9EjtJcdrsjf8kb2Rzu0seaF5Iq97pjfJXl1CeNRli51O7dcxk7s27uwWsVejaRu5MLZCRkc1chHUu2Vn2LZCkZALNGQgZDZD'
+
+
+```
+
+```{r}
+page.id <- "224361177912837"
+page <- getPage(page.id, token=token, n = 100)
+page %<>% mutate(mark = 0)
+#str(page)
+for(i in (1:dim(page)[1])){
+  if(grepl("公布", page$message[i])){
+    # str(page$message[i])
+    # print(page$likes_count[i])
+    page$mark[i] = 1
+  }
+}
+page$mark
+
+page1 <-
+  page %>%
+  select(message,mark,likes_count) %>%
+  group_by(mark) %>%
+  summarise(mean = mean(likes_count))
+
+page1
+```

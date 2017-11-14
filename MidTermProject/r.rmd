@@ -1,0 +1,25 @@
+```{r, results='hide'}
+fb.oauth <- "EAACEdEose0cBAJaUWD7wsnzZAyvLVBvJZAC6NGeDr0rJ4uFU8G8z86IdHkGzrwtnlaIGZBvekc8EY3RbADdmQDoYgDznna8LcNblos8ZAYZCNdAuKb9EjtJcdrsjf8kb2Rzu0seaF5Iq97pjfJXl1CeNRli51O7dcxk7s27uwWsVejaRu5MLZCRkc1chHUu2Vn2LZCkZALNGQgZDZD"
+
+```
+```{r}
+library(Rfacebook)
+page.id <- "1034537589900585" 
+page <- getPage(page.id, token = fb.oauth, n = 1000)
+#str(page)
+
+
+x <- list()
+for (i in c(1:1000))
+{
+post <- getPost(page$id[i], token= fb.oauth, n.comments=1000, likes=FALSE)
+comments <- post$comments$from_name
+x <- append(x,unlist(comments))
+}
+
+#黑特台大前1000篇文章評論中留言次數最多的人
+data <- sort(table(unlist(x)),decreasing = T)
+data[1:10]
+
+```
+

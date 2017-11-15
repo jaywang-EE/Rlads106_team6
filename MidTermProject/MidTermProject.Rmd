@@ -5,7 +5,7 @@ date: "2017年11月14日"
 output: html_document
 ---
 
-```{r}
+```{r,warning=FALSE,message=FALSE}
 library(jiebaR)
 library(tidyverse)
 library(tidytext)
@@ -16,31 +16,32 @@ library(magrittr)
 
 ```
 
-```{r}
-token <- 'EAACEdEose0cBAJaUWD7wsnzZAyvLVBvJZAC6NGeDr0rJ4uFU8G8z86IdHkGzrwtnlaIGZBvekc8EY3RbADdmQDoYgDznna8LcNblos8ZAYZCNdAuKb9EjtJcdrsjf8kb2Rzu0seaF5Iq97pjfJXl1CeNRli51O7dcxk7s27uwWsVejaRu5MLZCRkc1chHUu2Vn2LZCkZALNGQgZDZD'
-
-
+```{r,message=FALSE}
+token <- 'EAACEdEose0cBAE78ZC4hzO9AAGZBVIKsHlXRvNngRNw65P5A1t2srlzHK99AmQCAYSzlJB6kQmgNQZCNV6sv4dZCuBv4RKbjpmpemJ6nU3VtfpfQN988OozHPAYBMyciAbkHrZC6cm3IpZBny5NhQQKRnacy0dZAskpKdl8SPsW4p6auusT4CK4odqeqwbXZAiYn0h2GVBV7igZDZD'
 ```
 
-```{r}
+```{r,warning=FALSE}
 page.id <- "224361177912837"
 page <- getPage(page.id, token=token, n = 100)
-page %<>% mutate(mark = 0)
+page %<>% mutate(mark = 0, num = 1)
+#page$mark
 #str(page)
 for(i in (1:dim(page)[1])){
-  if(grepl("公布", page$message[i])){
-    # str(page$message[i])
-    # print(page$likes_count[i])
-    page$mark[i] = 1
+  if(grepl("公開分享", page$message[i]) == T){
+    #str(page$message[i])
+    #print(page$likes_count[i])
+    page$mark[i] <- 1
   }
 }
-page$mark
-
 page1 <-
   page %>%
-  select(message,mark,likes_count) %>%
+  select(message,mark,likes_count,num) %>%
   group_by(mark) %>%
-  summarise(mean = mean(likes_count))
+  summarise(mean = mean(likes_count), n = sum(num))
 
-page1
+#page1
+
+sprintf("沒有抽獎的平均贊數是：%g個",page1$mean[1])
+sprintf("  有抽獎的平均贊數是：%g個",page1$mean[2])
+sprintf("    有抽獎時的人氣是：%g倍",page1$mean[2]/page1$mean[1])
 ```

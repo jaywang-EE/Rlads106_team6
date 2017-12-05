@@ -1,0 +1,152 @@
+---
+title: "[W12] presidents"
+output: 
+    html_document:
+        theme: default
+        highlight: pygments
+
+---
+
+```{r env.setup, echo=TRUE, message=FALSE, warning=FALSE}
+# your environment setup
+library(dplyr)
+library(magrittr)
+library(rvest)
+library(httr)
+library(XML)
+library(tm)
+library(ggplot2)
+```
+
+R 語言與資料科學導論團體作業 (W12)
+=============================
+
+未知系 第六組
+
+#本組探討問題：川普的用字是否“低端”
+##問題描述：我們依據“全民英檢”字彙表，將歷任總統的用字遣詞做分類，想知道是否如外界所說，川普總統的用字非常“粗鄙”
+
+#GET DICTIONARY
+```{r parser.w3.heading}
+alphabats = c('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z')
+addr <- "http://www.taiwantestcentral.com/WordList/WordListByName.aspx?MainCategoryID=4&Letter="
+
+#command = "html>body>from#aspnetForm>table>tbody>tr>td>table>tbody>tr>td.nowrap.w3"
+dictionary <- data.frame(level = NA, word = NA)
+fst <- T
+#print(length(tbls))
+for(ab in alphabats){
+  print(ab)
+  #html <- read_html(paste(addr, ab, sep = ""))
+  tblsTmp <- readHTMLTable(paste(addr, ab, sep = ""),which = 1)
+  #print(dictionary)
+  #print(length(dictionary))
+  tblsTmp %<>%
+    select(V2, V4)
+  
+  if(fst == T){
+    dictionary <- tblsTmp
+    fst <- F
+  }
+  else{
+    dictionary <- rbind(dictionary, tblsTmp)
+  }
+}
+colnames(dictionary) <- c("level","word")
+
+write.table(dictionary, file = "test.CSV", sep = ",")
+
+```
+
+#Count the "word level" and plot
+```{r parser.w3.links}
+dictionaryDi <-
+  dictionary %>%
+    filter(level == "初級")
+dictionaryZhong <-
+  dictionary %>%
+    filter(level == "中級")
+dictionaryZhonggao <-
+  dictionary %>%
+    filter(level == "中高級")
+
+corpus = VCorpus(DirSource("./usP"))
+
+inspect(corpus[1:2])
+
+corpus %<>%
+  tm_map(stripWhitespace) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeWords,stopwords("english"))
+
+inspect(corpus[1:2])
+
+class(stopwords("english"))
+
+#as.character(dictionaryDi$word)
+
+TDM <- TermDocumentMatrix(corpus)
+
+scoreDi <- 
+  tm_term_score(TDM, as.character(dictionaryDi$word))
+scoreDi <- as.data.frame(scoreDi)
+
+scoreZhong <- 
+  tm_term_score(TDM, as.character(dictionaryZhong$word))
+scoreZhong <- as.data.frame(scoreZhong)
+
+scoreZhongGao <- 
+  tm_term_score(TDM, as.character(dictionaryZhonggao$word))
+scoreZhongGao <- as.data.frame(scoreZhongGao)
+```
+
+#calculate ratio
+```{r parser.w3.links}
+score <- cbind(scoreDi, scoreZhong, scoreZhongGao)
+rowNm <- rownames(score)
+score <- cbind(as.data.frame(rowNm), score)
+
+score %<>%
+  rename(doc = rowNm) %>%
+  mutate(total_words = scoreDi + scoreZhong + scoreZhongGao) %>%
+  mutate(ratioDi = scoreDi/total_words) %>%
+  mutate(ratioZhong = scoreZhong/total_words) %>%
+  mutate(ratioZhonggao = scoreZhongGao/total_words) %>%
+  select(doc, contains("ratio")) %>%
+  arrange((ratioZhonggao))
+
+score <- score[1:10,]
+
+
+ratioDi <- 
+  score %>%
+  select(doc, ratioDi) %>%
+  rename(ratio = ratioDi) %>%
+  mutate(level = "3-low")
+ratioZhong <- 
+  score %>%
+  select(doc, ratioZhong) %>%
+  rename(ratio = ratioZhong) %>%
+  mutate(level = "2-mid")
+ratioZhonggao <- 
+  score %>%
+  select(doc, ratioZhonggao) %>%
+  rename(ratio = ratioZhonggao) %>%
+  mutate(level = "1-midhigh")
+  
+ratio <- rbind(ratioZhonggao, ratioZhong, ratioDi)
+
+#rownames(score)
+#score
+```
+
+```{r parser.w3.links}
+g <- ggplot(data = ratio, 
+            aes(x = doc, y=ratio, fill=level, label = ratio))
+g + geom_bar(stat = "identity") +
+  labs(title = "The \"low level\" USA presidents", x = "presidents", y = "ratio") +
+  theme(axis.text.x=element_text(angle=30, vjust=0.5))
+# p <- qplot(ratio$doc, weight = ratio$ratio, data = ratio, geom = "histogram", fill = ratio$level)
+# p
+```

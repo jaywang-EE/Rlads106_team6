@@ -1,0 +1,768 @@
+---
+title: "test1"
+author: "Jay"
+date: "2017年12月31日"
+output: html_document
+---
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+```
+
+```{r suicide, warning=FALSE}
+suicide <- read_csv("~/R/fin/1217/suicide.csv")
+
+#suicide
+
+suicide %<>%
+  select(LOCATION, SUBJECT, TIME, Value) %>%
+  mutate(nSample = 100000)
+
+suicide
+```
+
+```{r read}
+happydata <- read_csv("~/R/fin/1228/happydata.csv")
+pol <- read_csv("~/R/fin/1228/pol.csv")
+
+internet <- read_csv("~/R/fin/1228/OECD_Internet_Access_Adjusted.csv")
+workhour <- read_csv("~/R/fin/1228/OECD_Hours_Worked_Adjusted.csv")
+adulteducation <- read_csv("~/R/fin/1228/OECD_Adult_Education_Adjusted.csv")
+HDI2014 <- read_csv("~/R/fin/1228/OECD_Household_Disposable_Income_Adjusted.csv")
+teachinghours <- read_csv("~/R/fin/1228/OECD_Teaching_Hours_Adjusted.csv")
+
+marriageT <- read_csv("~/R/fin/1231/marriage.csv",col_names=T)
+
+internetT <- read_csv("~/R/fin/1231/FullData_OECD_Internet_Access.csv")
+workhourT <- read_csv("~/R/fin/1231/FullData_OECD_Hours_Worked.csv")
+adulteducationT <- read_csv("~/R/fin/1231/FullData_OECD_Adult_Education.csv")
+teachinghoursT <- read_csv("~/R/fin/1231/FullData_OECD_Teaching_Hours.csv")
+internetT %<>%
+  mutate(LOCATIONT=paste(LOCATION,TIME,sep="")) %>%
+  select(LOCATIONT,Value,LOCATION,TIME) %>% 
+  arrange(LOCATION)
+workhourT %<>%
+  mutate(LOCATIONT=paste(LOCATION,TIME,sep="")) %>%
+  select(LOCATIONT,Value,LOCATION,TIME) %>% 
+  arrange(LOCATION)
+adulteducationT %<>%
+  filter(SUBJECT=="TRY") %>%
+  mutate(LOCATIONT=paste(LOCATION,TIME,sep="")) %>%
+  select(LOCATIONT,Value,LOCATION,TIME) %>% 
+  arrange(LOCATION)
+teachinghoursT %<>%
+  filter(MEASURE=="HR_YEAR") %>%
+  filter(SUBJECT=="PRY") %>%
+  mutate(LOCATIONT=paste(LOCATION,TIME,sep="")) %>%
+  select(LOCATIONT,Value,LOCATION,TIME) %>% 
+  arrange(LOCATION)
+
+tmpDF <- data.frame(LOCATION="",TIME=0,Value=0,stringsAsFactors = F)
+fst <- T
+year <- 1998
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`1998`[i],
+                      stringsAsFactors = F)
+  if(fst){
+    fst <- F
+    tmpDF <- tmpDF2
+  }
+  else{
+    tmpDF <- rbind(tmpDF,tmpDF2)
+  }
+}
+year <- 1999
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`1999`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2000
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2000`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2001
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2001`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2002
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2002`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+
+year <- 2003
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2003`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2004
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2004`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2005
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2005`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2006
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2006`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+year <- 2007
+for(i in seq(dim(marriageT)[1])){
+  tmpDF2 <- data.frame(LOCATION=marriageT$LOCATION[i],
+                      TIME=year,Value=marriageT$`2007`[i],
+                      stringsAsFactors = F)
+  tmpDF <- rbind(tmpDF,tmpDF2)
+}
+marriageT <- tmpDF %>%
+  mutate(LOCATIONT=paste(LOCATION,TIME,sep="")) %>%
+  select(LOCATIONT,Value,LOCATION,TIME) %>% 
+  arrange(LOCATIONT)
+marriageT
+
+chocolate <- read_csv("~/R/fin/1228/chocolate.csv")
+gdp <- read_csv("~/R/fin/1228/gdp.csv")
+gini <- read_csv("~/R/fin/1228/gini.csv")
+#HDI2014 <- read_csv("~/R/fin/1228/HDI-2014.csv")
+dataSep <- 3
+
+
+
+happydata
+pol
+
+internet
+workhour
+adulteducation
+HDI2014
+teachinghours
+
+internetT
+workhourT
+adulteducationT
+teachinghoursT
+
+chocolate
+gdp
+gini
+
+
+HDI2014
+```
+
+```{r chocolate}
+
+sui <- suicide %>%
+  filter(SUBJECT == "TOT") %>%
+  group_by(LOCATION) %>%
+  summarise(avg = mean(Value))
+sui %<>% arrange(LOCATION)
+countryList <- sui$LOCATION
+
+newList <- happydata##
+sui %<>% mutate(happy = -1)##
+tarCol1 <- 3##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+
+newList <- internet##
+sui %<>% mutate(internet = -1)##
+tarCol1 <- 4##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+
+
+newList <- workhour##
+sui %<>% mutate(workhour = -1)##
+tarCol1 <- 5##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+
+newList <- adulteducation##
+sui %<>% mutate(adulteducation = -1)##
+tarCol1 <- 6##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+
+newList <- HDI2014##
+sui %<>% mutate(HDI2014 = -1)##
+tarCol1 <- 7##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+
+newList <- teachinghours##
+sui %<>% mutate(teachinghours = -1)##
+tarCol1 <- 8##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+
+newList <- chocolate##
+sui %<>% mutate(chocolate = -1)##
+tarCol1 <- tarCol1 + 1##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryList)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(`Location	`)
+
+j <- 1
+tarCol2 <- 2
+for(i in c(1:dim(sui)[1])){
+  if(sui[i,1] == newList[j,1]){
+    sui[i,tarCol1] <- newList[j,tarCol2]
+    j <- j + 1
+    if(j > dim(newList)[1])
+      break
+  }
+}
+sui
+
+
+```
+
+```{r T}
+
+suiT <- suicide %>%
+  filter(SUBJECT == "TOT")
+suiT %<>% arrange(LOCATION) %>%
+  mutate(LOCATION=paste(LOCATION,TIME,sep="")) %>%
+  select(LOCATION, Value)
+countryListT <- suiT$LOCATION
+
+polT <- pol %>%
+  mutate(LOCATION=paste(LOCATION,TIME,sep=""))
+polT <- polT[,-2]
+
+newList <- polT##
+tarCol1 <- 3##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryListT)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+
+for( i1 in seq(2,length(newList))){
+#  suiT %<>% mutate(str(colnames(newList)[i]) = -1)##
+  suiT[,tarCol1 + i1 - 2] <- rep(NA,length(dim(suiT)[1]))
+  colnames(suiT)[tarCol1 + i1 - 2] <- colnames(newList)[i1]
+  j <- 1
+  tarCol2 <- i1
+  for(i2 in c(1:dim(suiT)[1])){
+    if(suiT[i2,1] == newList[j,1]){
+      suiT[i2,tarCol1 + i1 - 2] <- newList[j,tarCol2]
+      j <- j + 1
+      if(j > dim(newList)[1])
+        break
+    }
+  }
+}
+
+# 
+# j <- 1
+# tarCol2 <- 2
+# for(i in c(1:dim(suiT)[1])){
+#   if(suiT[i,1] == newList[j,1]){
+#     suiT[i,tarCol1] <- newList[j,tarCol2]
+#     j <- j + 1
+#     if(j > dim(newList)[1])
+#       break
+#   }
+# }
+# 
+# for(i in seq(length(suiT))){
+#   for(j in seq(dim(suiT)[1])){
+#     if(is.na(suiT[j,i])){
+#       #print("NA")
+#       suiT[j,i] = 0.0
+#     }
+#   }
+# }
+
+suiT[is.na(suiT)] <- 0.0
+suiT
+
+```
+
+```{r T2}
+
+newList <- internetT##
+colName <- "internetT"
+tarCol1 <- 8##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryListT)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+for( i1 in seq(2,length(newList))){
+#  suiT %<>% mutate(str(colnames(newList)[i]) = -1)##
+  suiT[,tarCol1 + i1 - 2] <- rep(0.0,length(dim(suiT)[1]))
+  colnames(suiT)[tarCol1 + i1 - 2] <- paste(colName,colnames(newList)[i1],sep = "")
+  j <- 1
+  tarCol2 <- i1
+  for(i2 in c(1:dim(suiT)[1])){
+    if(suiT[i2,1] == newList[j,1]){
+      suiT[i2,tarCol1 + i1 - 2] <- newList[j,tarCol2]
+      j <- j + 1
+      if(j > dim(newList)[1])
+        break
+    }
+  }
+}
+
+newList <- workhourT##
+colName <- "workhourT"
+tarCol1 <- tarCol1 + dataSep##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryListT)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+
+
+for( i1 in seq(2,length(newList))){
+#  suiT %<>% mutate(str(colnames(newList)[i]) = -1)##
+  suiT[,tarCol1 + i1 - 2] <- rep(0.0,length(dim(suiT)[1]))
+  colnames(suiT)[tarCol1 + i1 - 2] <- paste(colName,colnames(newList)[i1],sep = "")
+  j <- 1
+  tarCol2 <- i1
+  for(i2 in c(1:dim(suiT)[1])){
+    if(suiT[i2,1] == newList[j,1]){
+      suiT[i2,tarCol1 + i1 - 2] <- newList[j,tarCol2]
+      j <- j + 1
+      if(j > dim(newList)[1])
+        break
+    }
+  }
+}
+newList <- adulteducationT##
+colName <- "adulteducationT"
+tarCol1 <- tarCol1 + dataSep##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryListT)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+
+for( i1 in seq(2,length(newList))){
+#  suiT %<>% mutate(str(colnames(newList)[i]) = -1)##
+  suiT[,tarCol1 + i1 - 2] <- rep(0.0,length(dim(suiT)[1]))
+  colnames(suiT)[tarCol1 + i1 - 2] <- paste(colName,colnames(newList)[i1],sep = "")
+  j <- 1
+  tarCol2 <- i1
+  for(i2 in c(1:dim(suiT)[1])){
+    if(suiT[i2,1] == newList[j,1]){
+      suiT[i2,tarCol1 + i1 - 2] <- newList[j,tarCol2]
+      j <- j + 1
+      if(j > dim(newList)[1])
+        break
+    }
+  }
+}
+newList <- teachinghoursT##
+colName <- "teachinghoursT"
+tarCol1 <- tarCol1 + dataSep##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryListT)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATION)
+
+
+
+for( i1 in seq(2,length(newList))){
+#  suiT %<>% mutate(str(colnames(newList)[i]) = -1)##
+  suiT[,tarCol1 + i1 - 2] <- rep(0.0,length(dim(suiT)[1]))
+  colnames(suiT)[tarCol1 + i1 - 2] <- paste(colName,colnames(newList)[i1],sep = "")
+  j <- 1
+  tarCol2 <- i1
+  for(i2 in c(1:dim(suiT)[1])){
+    if(suiT[i2,1] == newList[j,1]){
+      suiT[i2,tarCol1 + i1 - 2] <- newList[j,tarCol2]
+      j <- j + 1
+      if(j > dim(newList)[1])
+        break
+    }
+  }
+}
+newList <- marriageT##
+colName <- "marriageT"
+tarCol1 <- tarCol1 + dataSep##
+i <- 1
+size <- dim(newList)[1]
+while(i <= size){
+  if(!(newList[i,1] %in% countryListT)){
+    newList <- newList[-i,]
+    i <- i - 1
+    size <- size - 1
+  }
+  i <- i + 1
+}
+newList <- newList %>% arrange(LOCATIONT)
+
+newList
+
+for( i1 in seq(2,length(newList))){
+#  suiT %<>% mutate(str(colnames(newList)[i]) = -1)##
+  suiT[,tarCol1 + i1 - 2] <- rep(0.0,length(dim(suiT)[1]))
+  colnames(suiT)[tarCol1 + i1 - 2] <- paste(colName,colnames(newList)[i1],sep = "")
+  j <- 1
+  tarCol2 <- i1
+  for(i2 in c(1:dim(suiT)[1])){
+    if(suiT[i2,1] == newList[j,1]){
+      suiT[i2,tarCol1 + i1 - 2] <- newList[j,tarCol2]
+      j <- j + 1
+      if(j > dim(newList)[1])
+        break
+    }
+  }
+}
+
+# 
+# gdp
+# gini %<>%
+#   filter(MEASURE=="GINI") %>%
+#   filter(AGE=="TOT") %>%
+#   filter(METHODO=="METH2011") %>%
+#   mutate(LOCATION = paste(LOCATION,TIME,sep="")) %>%
+#   select(LOCATION, Value)
+```
+
+```{r print}
+suiT
+
+
+newDF <- suiT %>%
+  select(Value, internetTValue, internetTLOCATION, internetTTIME) %>%
+  filter(internetTValue != 0)
+cor(newDF$Value, newDF$internetTValue)
+ggplot(newDF,aes(y=Value)) +
+  geom_point(aes(x=internetTValue), color=colors()[11])
+
+ggplot(data = newDF, y = Value, x = internetTValue, color = internetTLOCATION)
+
+
+newDF <- suiT %>%
+  select(Value, workhourTValue, workhourTLOCATION, workhourTTIME) %>%
+  filter(workhourTValue != 0)
+cor(newDF$Value, newDF$workhourTValue)
+ggplot(newDF,aes(y=Value)) +
+  geom_point(aes(x=workhourTValue), color=colors()[27])
+
+newDFnoT <- newDF %>%
+  group_by(workhourTLOCATION) %>%
+  summarise(avgSui = mean(Value), avgWork = mean(workhourTValue)) 
+cor(newDFnoT$avgSui, newDFnoT$avgWork)
+ggplot(newDFnoT,aes(y=avgSui)) +
+  geom_point(aes(x=avgWork), color=colors()[27])
+
+newDF <- suiT %>%
+  select(Value, adulteducationTValue) %>%
+  filter(adulteducationTValue != 0)
+cor(newDF$Value, newDF$adulteducationTValue)
+ggplot(newDF,aes(y=Value)) +
+  geom_point(aes(x=adulteducationTValue), color=colors()[41])
+
+newDF <- suiT %>%
+  select(Value, teachinghoursTValue, teachinghoursTLOCATION, teachinghoursTTIME) %>%
+  filter(teachinghoursTValue != 0)
+cor(newDF$Value, newDF$teachinghoursTValue)
+
+qplot(data = newDF, y = Value, x = teachinghoursTValue, color = teachinghoursTLOCATION)
+
+newDFnoT <- newDF %>%
+  group_by(teachinghoursTLOCATION) %>%
+  summarise(avgSui = mean(Value), avgWork = mean(teachinghoursTValue)) 
+cor(newDFnoT$avgSui, newDFnoT$avgWork)
+ggplot(newDFnoT,aes(y=avgSui)) +
+  geom_point(aes(x=avgWork), color=colors()[27])
+
+
+#ToT
+newDF <- suiT %>%
+  select(LOCATION, contains("Value")) %>%
+  filter(internetTValue!=0) %>%
+  filter(workhourTValue!=0) %>%
+  filter(adulteducationTValue!=0) %>%
+  filter(teachinghoursTValue!=0)
+
+newDF$internetTValue <- scale(newDF$internetTValue)
+newDF$workhourTValue <- scale(newDF$workhourTValue)
+newDF$adulteducationTValue <- scale(newDF$adulteducationTValue)
+newDF$teachinghoursTValue <- scale(newDF$teachinghoursTValue)
+newDF$Value <- scale(newDF$Value)
+newDF
+
+corI <- cor(newDF$Value, newDF$internetTValue)
+#cor(newDF$Value, newDF$workhourTValue)
+corA <- cor(newDF$Value, newDF$adulteducationTValue)
+corT <- cor(newDF$Value, newDF$teachinghoursTValue)
+newDF2 <- newDF %>%
+  mutate(newVal = as.numeric(corI)*internetTValue+
+           as.numeric(corA)*adulteducationTValue+
+           as.numeric(corT)*teachinghoursTValue) %>%
+  select(Value, newVal)
+
+cor(newDF2$Value, newDF2$newVal)
+ggplot(newDF2,aes(y=Value)) +
+  geom_point(aes(x=newVal), color=colors()[27])
+
+shake <- seq(-0.5,0.5,0.01)
+
+bestCor <- 0
+bestIdx <- c(0,0,0)
+for(i in shake){
+  #for(j in shake){
+    for(k in shake){
+      newDF2 <- newDF %>%
+        mutate(newVal = (as.numeric(corI)+i)*internetTValue+
+           #(as.numeric(corA)+j)*adulteducationTValue+
+           (as.numeric(corT)+k)*teachinghoursTValue)
+      corN <- cor(newDF2$Value, newDF2$newVal)
+      if(abs(bestCor) < abs(corN)){
+        bestCor <- corN
+        bestIdx <- c(i,j,k)
+      }
+    }
+  #} 
+}
+print(c(corI,corA,corT))
+print(bestIdx)
+print(c(bestIdx[1]+corI,bestIdx[2]+corA,bestIdx[3]+corT))
+
+newDF2 <- newDF %>%
+  mutate(newVal =
+           (as.numeric(corI)+bestIdx[1])*internetTValue+
+           (as.numeric(corT)+bestIdx[3])*teachinghoursTValue)
+corN <- cor(newDF2$Value, newDF2$newVal)
+
+ggplot(newDF2,aes(y=Value)) +
+  geom_point(aes(x=newVal), color=colors()[27])+
+  labs(title = "Publicity, r = 0.3129",
+       x = "Publicity indicator(std)", 
+       y = "suicide rate(std)")+
+  geom_smooth(aes(x=newVal), method = "lm")
+
+
+
+newDF <- suiT %>%
+  select(LOCATION,Value, marriageTValue, marriageTLOCATION) %>%
+  filter(marriageTValue != 0)
+newDF
+cor(newDF$Value, newDF$marriageTValue)
+
+ggplot(newDF,aes(y=Value)) +
+  geom_point(aes(x=marriageTValue), color=colors()[100])+
+  labs(title = "Break Marriage, r = 0.4069",
+       x = "Break Marriage", 
+       y = "suicide rate")
+levelOfLOCATION <- levels(factor(newDF$marriageTLOCATION))
+
+i <- 1
+endPoint <- min(i*6, length(levelOfLOCATION))
+tmpLevel <- levelOfLOCATION[(i-1)*6 + 1:endPoint]
+newDF2 <- newDF %>%
+  filter(marriageTLOCATION %in% tmpLevel)
+qplot(data = newDF2, y = Value, x = marriageTValue, 
+      shape = marriageTLOCATION)
+
+
+
+teachinghoursT
+suiT
+# 
+# adulteducationT
+# pol
+# gini
+# gini %>% select(LOCATION,Value)
+# suiT
+# internetT
+```
+
+```{r o/p}
+  write.csv(suiT, file="multidataT.csv")
+```
